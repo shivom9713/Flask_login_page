@@ -1,0 +1,53 @@
+version: "3.7"
+services:
+  mysql_db:
+    
+    image: mysql:latest
+    volumes:
+      - mysql_login:/var/lib/mysql
+      # - ./db:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_USERNAME: 'root'
+      MYSQL_ROOT_PASSWORD: 'development_instance_root_password'
+      MYSQL_DATABASE: 'warehouse_database'
+      MYSQL_USER: 'warehouse_user'
+      MYSQL_PASSWORD: 'development_instance_password'
+    ports:
+      - '50903:3306'
+    
+    networks:
+      - backend
+    # restart: unless-stopped
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    # restart: unless-stopped
+    environment:
+      PMA_HOST: mysql_db
+    depends_on:
+      - mysql_db
+    ports:
+      - "9090:80"
+    networks:
+      - backend
+
+  flask_app:
+    build: 
+      context: .
+      dockerfile: ./Dockerfile
+    volumes:
+      - .:/expense_login_App
+    container_name: flask_app_container
+    # restart: unless-stopped
+    ports:
+      - "8000:5000"
+    networks:
+      - backend
+      - front-end
+
+volumes:
+  mysql_login:
+
+networks:
+  front-end:
+  backend:
